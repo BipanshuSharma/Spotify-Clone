@@ -5,13 +5,13 @@ const connectDB = require('./src/db/db');
 async function startServer() {
   try {
     await connectDB();
-    app.listen(3000, () => {
-      console.log('Server is running on port 3000');
-    });
   } catch (error) {
-    console.error('MongoDB connection failed:', error.message);
-    process.exit(1);
+    console.warn('Continuing without MongoDB connection for development.');
   }
+
+  app.listen(3000, () => {
+    console.log('Server is running on port 3000');
+  });
 }
 
 startServer();
