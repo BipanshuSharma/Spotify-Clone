@@ -2,9 +2,24 @@ const musicModel = require('../models/music.model');
 const { uploadFile } = require('../services/stroage.services');
 const jwt = require('jsonwebtoken');
 
+const JWT_SECRET = process.env.JWT_SECRET || 'default-secret';
+
+function extractToken(req) {
+    const cookieToken = req.cookies && req.cookies.token;
+    if (cookieToken) return cookieToken;
+
+    const authorizationHeader = req.headers.authorization || req.headers.Authorization;
+    if (!authorizationHeader) return null;
+
+    if (authorizationHeader.startsWith('Bearer ')) {
+        return authorizationHeader.split(' ')[1];
+    }
+
+    return authorizationHeader;
+}
 
 async function createMusic(req, res) {
-    const token = req.cookies && req.cookies.token;
+    const token = extractToken(req);
 
     if (!token) {
         return res.status(401).json({ message: 'Unauthorized' });
@@ -12,7 +27,7 @@ async function createMusic(req, res) {
 
     let decoded;
     try {
-        decoded = jwt.verify(token, process.env.JWT_SECRET);
+        decoded = jwt.verify(token, JWT_SECRET);
     } catch (err) {
         return res.status(401).json({ message: 'Unauthorized' });
     }
